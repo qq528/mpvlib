@@ -57,6 +57,12 @@ LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 LOCAL_EXPORT_C_INCLUDES := $(PREFIX)/include
 include $(PREBUILT_SHARED_LIBRARY)
 
+# libbluray（已静态并入 libmpv）依赖的 UDF 读取库，缺它会导致加载 libmpv 时 dlopen 失败
+include $(CLEAR_VARS)
+LOCAL_MODULE := libudfread
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
+include $(PREBUILT_SHARED_LIBRARY)
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := libmpv
 LOCAL_SRC_FILES := $(PREFIX)/lib/libmpv.so

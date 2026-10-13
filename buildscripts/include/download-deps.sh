@@ -26,6 +26,9 @@ fi
 if ! git -C ffmpeg apply --reverse --check ../../patches/ffmpeg_force_mpegts.patch 2>/dev/null; then
 	git -C ffmpeg apply ../../patches/ffmpeg_force_mpegts.patch
 fi
+if ! git -C ffmpeg apply --reverse --check ../../patches/ffmpeg_sni_follow_verify.patch 2>/dev/null; then
+	git -C ffmpeg apply ../../patches/ffmpeg_sni_follow_verify.patch
+fi
 
 # freetype2
 if [ ! -d freetype2 ]; then
@@ -40,23 +43,20 @@ fi
 
 # fribidi - use vX.Y.Z tag format for releases
 if [ ! -d fribidi ]; then
-	mkdir fribidi
-	$WGET https://github.com/fribidi/fribidi/releases/download/v$v_fribidi/fribidi-$v_fribidi.tar.xz -O - | \
-		tar -xJ -C fribidi --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch v$v_fribidi https://github.com/fribidi/fribidi fribidi
 fi
 
 # harfbuzz
 if [ ! -d harfbuzz ]; then
-	mkdir harfbuzz
-	$WGET https://github.com/harfbuzz/harfbuzz/releases/download/$v_harfbuzz/harfbuzz-$v_harfbuzz.tar.xz -O - | \
-		tar -xJ -C harfbuzz --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch $v_harfbuzz https://github.com/harfbuzz/harfbuzz harfbuzz
 fi
 
 # unibreak
 if [ ! -d unibreak ]; then
-	mkdir unibreak
-	$WGET https://github.com/adah1972/libunibreak/releases/download/libunibreak_${v_unibreak//./_}/libunibreak-${v_unibreak}.tar.gz -O - | \
-		tar -xz -C unibreak --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch libunibreak_${v_unibreak//./_} https://github.com/adah1972/libunibreak unibreak
 fi
 
 # libxml2
@@ -68,16 +68,14 @@ fi
 
 # libmysofa
 if [ ! -d libmysofa ]; then
-	mkdir libmysofa
-	$WGET https://github.com/hoene/libmysofa/archive/refs/tags/v${v_libmysofa}.tar.gz -O - | \
-		tar -xz -C libmysofa --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch v$v_libmysofa https://github.com/hoene/libmysofa libmysofa
 fi
 
 # libaribcaption
 if [ ! -d libaribcaption ]; then
-	mkdir libaribcaption
-	$WGET https://github.com/xqq/libaribcaption/archive/refs/tags/v${v_libaribcaption}.tar.gz -O - | \
-		tar -xz -C libaribcaption --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch v$v_libaribcaption https://github.com/xqq/libaribcaption libaribcaption
 fi
 
 # fontconfig
@@ -117,23 +115,20 @@ fi
 
 # xz
 if [ ! -d xz ]; then
-	mkdir xz
-	$WGET https://github.com/tukaani-project/xz/releases/download/v${v_xz}/xz-${v_xz}.tar.xz -O - | \
-		tar -xJ -C xz --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch v$v_xz https://github.com/tukaani-project/xz xz
 fi
 
 # zstd
 if [ ! -d zstd ]; then
-	mkdir zstd
-	$WGET https://github.com/facebook/zstd/releases/download/v${v_zstd}/zstd-${v_zstd}.tar.gz -O - | \
-		tar -xz -C zstd --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch v$v_zstd https://github.com/facebook/zstd zstd
 fi
 
 # libarchive
 if [ ! -d libarchive ]; then
-	mkdir libarchive
-	$WGET https://github.com/libarchive/libarchive/releases/download/v${v_libarchive}/libarchive-${v_libarchive}.tar.xz -O - | \
-		tar -xJ -C libarchive --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch v$v_libarchive https://github.com/libarchive/libarchive libarchive
 fi
 
 # libdvdread
@@ -152,9 +147,8 @@ fi
 
 # rubberband
 if [ ! -d rubberband ]; then
-	mkdir rubberband
-	$WGET https://github.com/breakfastquay/rubberband/archive/refs/tags/v${v_rubberband}.tar.gz -O - | \
-		tar -xz -C rubberband --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch v$v_rubberband https://github.com/breakfastquay/rubberband rubberband
 fi
 
 # libass - use GitHub mirror
@@ -176,9 +170,8 @@ fi
 
 # openssl
 if [ ! -d openssl ]; then
-	mkdir openssl
-	$WGET https://github.com/openssl/openssl/releases/download/openssl-$v_openssl/openssl-$v_openssl.tar.gz -O - | \
-		tar -xz -C openssl --strip-components=1
+	# 本地网络无法访问 GitHub release 下载域名，改用 git 克隆同一标签
+	git clone --depth 1 --branch openssl-$v_openssl https://github.com/openssl/openssl openssl
 fi
 
 # shaderc
@@ -201,6 +194,10 @@ if [ ! -d curl ]; then
 	mkdir curl
 	$WGET https://curl.se/download/curl-$v_curl.tar.gz -O - | \
 		tar -xz -C curl --strip-components=1
+fi
+# curl 不是 git 仓库，用 grep 标记判断补丁是否已打
+if ! grep -q "SNI 跟随 tls-verify" curl/lib/vtls/mbedtls.c 2>/dev/null; then
+	(cd curl && patch -p1 < ../../patches/curl_sni_follow_verify.patch)
 fi
 
 # mpv

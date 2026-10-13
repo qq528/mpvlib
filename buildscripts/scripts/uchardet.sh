@@ -15,10 +15,12 @@ else
 	exit 255
 fi
 
+# uchardet 声明的 cmake_minimum_required(3.1) 低于 CMake 4 的最低兼容线，需显式放宽
 android_cmake_setup . "$build" \
 	-DBUILD_BINARY=OFF \
 	-DBUILD_SHARED_LIBS=OFF \
-	-DCHECK_SSE2=OFF
+	-DCHECK_SSE2=OFF \
+	-DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 android_cmake_build "$build"
 android_cmake_install "$build"

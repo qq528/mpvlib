@@ -1,0 +1,27 @@
+diff --git a/libavformat/tls_mbedtls.c b/libavformat/tls_mbedtls.c
+index 444148be8a..0cff6a4af0 100644
+--- a/libavformat/tls_mbedtls.c
++++ b/libavformat/tls_mbedtls.c
+@@ -633,8 +633,8 @@ static int tls_open(URLContext *h, const char *uri, int flags, AVDictionary **op
+     }
+ 
+ #ifdef MBEDTLS_SSL_PROTO_TLS1_3
+-    // this version does not allow disabling certificate verification with TLSv1.3 (yes, really).
+-    if (mbedtls_version_get_number() == 0x03060000 && !shr->verify) {
++    // mbedtls 3.6 全系在 TLS 1.3 下不允许关闭证书校验，关闭校验时压回 1.2。
++    if (mbedtls_version_get_number() >= 0x03060000 && mbedtls_version_get_number() < 0x03070000 && !shr->verify) {
+         av_log(h, AV_LOG_INFO, "Forcing TLSv1.2 because certificate verification is disabled\n");
+         mbedtls_ssl_conf_max_tls_version(&tls_ctx->ssl_config, MBEDTLS_SSL_VERSION_TLS1_2);
+     }
+@@ -673,7 +673,10 @@ static int tls_open(URLContext *h, const char *uri, int flags, AVDictionary **op
+         goto fail;
+     }
+ 
+-    if (!shr->listen) {
++    // SNI 跟随 tls-verify：开启校验时设置主机名（发送 SNI 并校验证书主机名）；
++    // 关闭校验时不发送 SNI，用于兼容拒绝 SNI 的服务端（authmode 已为 NONE，
++    // mbedtls 3.6 的"REQUIRED 必须设主机名"限制不生效）。
++    if (!shr->listen && shr->verify) {
+         if ((ret = mbedtls_ssl_set_hostname(&tls_ctx->ssl_context, shr->host)) != 0) {
+             av_log(h, AV_LOG_ERROR, "mbedtls_ssl_set_hostname returned %d\n", ret);
+             goto fail;

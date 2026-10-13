@@ -1,0 +1,59 @@
+--- a/lib/vtls/mbedtls.c
++++ b/lib/vtls/mbedtls.c
+@@ -833,11 +833,19 @@
+     &backend->config, MBEDTLS_SSL_TLS1_3_SIGNAL_NEW_SESSION_TICKETS_ENABLED);
+ #endif
+ 
+-  /* Always let mbedTLS verify certificates, if verifypeer or verifyhost are
+-   * disabled we clear the corresponding error flags in the verify callback
+-   * function. That is also where we log verification errors. */
+-  mbedtls_ssl_conf_verify(&backend->config, mbed_verify_cb, cf);
+-  mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_REQUIRED);
++  if(conn_config->verifypeer) {
++    /* Always let mbedTLS verify certificates, if verifypeer or verifyhost are
++     * disabled we clear the corresponding error flags in the verify callback
++     * function. That is also where we log verification errors. */
++    mbedtls_ssl_conf_verify(&backend->config, mbed_verify_cb, cf);
++    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_REQUIRED);
++  }
++  else {
++    /* 校验关闭时改用 VERIFY_NONE，并配合跳过 set_hostname 实现无 SNI 且不校验。
++       不能保留 REQUIRED：mbedtls 3.6 规定客户端 REQUIRED 模式必须先设置主机名，
++       否则握手直接失败。 */
++    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_NONE);
++  }
+ 
+   mbedtls_ssl_init(&backend->ssl);
+   backend->initialized = TRUE;
+@@ -939,14 +947,23 @@
+                               &backend->pk);
+   }
+ 
+-  if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni ?
+-                              connssl->peer.sni :
+-                              connssl->peer.origin->hostname)) {
+-    /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
+-       the name to set in the SNI extension. Thus even if curl connects to
+-       a host specified as an IP address, this function must be used. */
+-    failf(data, "Failed to set SNI");
+-    return CURLE_SSL_CONNECT_ERROR;
++  /* SNI 跟随 tls-verify：开启校验时设置主机名（发送 SNI 并校验证书主机名）；
++     关闭校验时不发送 SNI（authmode 已为 NONE，mbedtls 不再要求主机名），
++     并把 TLS 上限压到 1.2（mbedtls 3.6 在 TLS 1.3 下不允许关闭证书校验）。 */
++  if(conn_config->verifypeer) {
++    if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni ?
++                                connssl->peer.sni :
++                                connssl->peer.origin->hostname)) {
++      /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
++         the name to set in the SNI extension. Thus even if curl connects to
++         a host specified as an IP address, this function must be used. */
++      failf(data, "Failed to set SNI");
++      return CURLE_SSL_CONNECT_ERROR;
++    }
++  }
++  else {
++    mbedtls_ssl_conf_max_tls_version(&backend->config,
++                                     MBEDTLS_SSL_VERSION_TLS1_2);
+   }
+ 
+ #ifdef HAS_ALPN_MBEDTLS

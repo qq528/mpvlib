@@ -106,6 +106,14 @@ fi
 
 ninja -C $build -j$cores
 
+# 重复运行时 meson 可能按交叉文件回退为静态库，先自检再校验动态符号，
+# 避免动态库缺失时误报 fork 校验失败。
+if [ -f $build/libmpv.a ]; then
+	echo >&2 "Meson produced static libmpv.a instead of shared libmpv.so, forcing rebuild."
+	$0 clean
+	exec $0 build
+fi
+
 if readelf --wide --dyn-syms "$build/libmpv.so" | grep -Eq '[[:space:]]clone@LIBC([[:space:]]|$)'; then
 	echo "Android libmpv still imports clone@LIBC; refusing to package it." >&2
 	exit 1
@@ -113,12 +121,6 @@ fi
 if ! readelf --wide --dyn-syms "$build/libmpv.so" | grep -Eq '[[:space:]]fork@LIBC([[:space:]]|$)'; then
 	echo "Android libmpv does not import fork@LIBC; subprocess fallback is missing." >&2
 	exit 1
-fi
-
-if [ -f $build/libmpv.a ]; then
-	echo >&2 "Meson produced static libmpv.a instead of shared libmpv.so, forcing rebuild."
-	$0 clean
-	exec $0 build
 fi
 
 DESTDIR="$prefix_dir" ninja -C $build install

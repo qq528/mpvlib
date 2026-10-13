@@ -23,6 +23,9 @@ else
 fi
 ./scripts/config.py set MBEDTLS_PLATFORM_DEV_RANDOM '"/dev/urandom"'
 
+# === 新增：禁用 SNI  ===
+./scripts/config.py unset MBEDTLS_SSL_SERVER_NAME_INDICATION
+
 mkdir -p _build$ndk_suffix
 cd _build$ndk_suffix
 

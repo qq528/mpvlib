@@ -7,6 +7,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
+# macOS 的 BSD sed 在 UTF-8 locale 下遇到非文本字节会报非法序列，
+# 本脚本会从目标文件中抽取字节级数据，统一按字节处理。
+export LC_ALL=C
+
 . buildscripts/include/depinfo.sh
 
 case "$1" in
@@ -127,21 +131,13 @@ require_version shaderc "$SHADERC_VERSION"
 require_version "Android NDK" "$NDK_VERSION"
 
 # Get the build date from mpv's compiled object file.
+# 原实现按 GNU readelf 的固定列号推算 .rodata 偏移并 dd 截取，
+# 在 llvm-readelf 上列号错位会取出二进制字节，故改用 strings 直接提取。
 DATE=unknown
 OBJ_FILE="buildscripts/deps/mpv/_build$1/libmpv.so.p/common_version.c.o"
 if [ -f "$OBJ_FILE" ]; then
-	RODATA_SECTION=$(readelf "$OBJ_FILE" -S 2>/dev/null | grep .rodata || true)
-	if [ -n "$RODATA_SECTION" ]; then
-		START_RODATA=0x$(echo "$RODATA_SECTION" | cut -d ' ' -f 27)
-		START=0x$(readelf "$OBJ_FILE" -s 2>/dev/null | grep mpv_builddate | cut -d ' ' -f 7)
-		SIZE=$(readelf "$OBJ_FILE" -s 2>/dev/null | grep mpv_builddate | cut -d ' ' -f 11)
-		if [ -n "$START" ] && [ -n "$SIZE" ]; then
-			SKIP=$((START_RODATA + START - 1))
-			dd if="$OBJ_FILE" of=date.txt bs=1 skip=$SKIP count=$SIZE 2>/dev/null
-			DATE=$(cat date.txt 2>/dev/null)
-			rm -f date.txt
-		fi
-	fi
+	DATE=$(strings -a "$OBJ_FILE" 2>/dev/null | grep -m1 -E '^([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}|[A-Z][a-z]{2} [ 0-9][0-9] [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2})$')
+	[ -n "$DATE" ] || DATE=unknown
 fi
 
 versions_file=app/src/main/java/is/xyz/mpv/Utils.kt

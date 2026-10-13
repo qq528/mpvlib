@@ -13,6 +13,9 @@ else
 	exit 255
 fi
 
+# git 克隆的源码不含发行包自带的 configure，先按需生成
+[ -f configure ] || ./autogen.sh
+
 mkdir -p "$build"
 cd "$build"
 
