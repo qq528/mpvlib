@@ -197,8 +197,8 @@ if [ ! -d lcms2 ]; then
 	git clone --depth 1 --branch "lcms${v_lcms2}" https://github.com/mm2/Little-CMS.git lcms2
 fi
 
-# libplacebo - use GitHub mirror (haasn/libplacebo)
-[ ! -d libplacebo ] && git clone --recursive https://github.com/haasn/libplacebo
+# libplacebo - use GitHub mirror (haasn/libplacebo), pinned per depinfo.sh
+[ ! -d libplacebo ] && git clone --recursive --depth 1 --branch "$v_libplacebo" https://github.com/haasn/libplacebo
 
 # curl
 if [ ! -d curl ]; then

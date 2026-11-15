@@ -12,6 +12,8 @@ v_sdk_build_tools=37.0.0
 # LuaJIT 2.1 is a rolling release, so pin a commit of its v2.1 branch
 v_luajit=ea9eb7edb5eac4a9d175d74523db34fac0fa5180
 v_lcms2=2.20
+# libplacebo master 曾在 gpu-next 硬解路径出现纹理上传回归，锁定到 mpv 0.42.0 配套的标签
+v_libplacebo=v7.387.0
 # mpv release built by the library and no-vulkan variants (FongMi builds its own fork)
 v_mpv=0.42.0
 v_unibreak=8.0
@@ -80,4 +82,4 @@ dep_mpv_android=(mpv)
 v_ci_ffmpeg=n9.0.2
 
 # filename used to uniquely identify a build prefix
-ci_tarball="prefix-ndk-${v_ndk}-luajit-${v_luajit}-mujs-${v_mujs}-unibreak-${v_unibreak}-harfbuzz-${v_harfbuzz}-fribidi-${v_fribidi}-freetype-${v_freetype}-libxml2-${v_libxml2}-libmysofa-${v_libmysofa}-libaribcaption-${v_libaribcaption}-fontconfig-${v_fontconfig}-mbedtls-${v_mbedtls}-curl-${v_curl}-libbluray-${v_libbluray}-libiconv-${v_libiconv}-uchardet-${v_uchardet}-bzip2-${v_bzip2}-xz-${v_xz}-zstd-${v_zstd}-libarchive-${v_libarchive}-libdvdread-${v_libdvdread}-libdvdnav-${v_libdvdnav}-rubberband-${v_rubberband}-openssl-${v_openssl}-ffmpeg-${v_ci_ffmpeg}-lcms2-${v_lcms2}.tgz"
+ci_tarball="prefix-ndk-${v_ndk}-luajit-${v_luajit}-mujs-${v_mujs}-unibreak-${v_unibreak}-harfbuzz-${v_harfbuzz}-fribidi-${v_fribidi}-freetype-${v_freetype}-libxml2-${v_libxml2}-libmysofa-${v_libmysofa}-libaribcaption-${v_libaribcaption}-fontconfig-${v_fontconfig}-mbedtls-${v_mbedtls}-curl-${v_curl}-libbluray-${v_libbluray}-libiconv-${v_libiconv}-uchardet-${v_uchardet}-bzip2-${v_bzip2}-xz-${v_xz}-zstd-${v_zstd}-libarchive-${v_libarchive}-libdvdread-${v_libdvdread}-libdvdnav-${v_libdvdnav}-rubberband-${v_rubberband}-openssl-${v_openssl}-ffmpeg-${v_ci_ffmpeg}-lcms2-${v_lcms2}-libplacebo-${v_libplacebo}.tgz"
