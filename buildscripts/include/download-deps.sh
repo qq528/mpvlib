@@ -26,6 +26,10 @@ fi
 if ! git -C ffmpeg apply --reverse --check ../../patches/ffmpeg_force_mpegts.patch 2>/dev/null; then
 	git -C ffmpeg apply ../../patches/ffmpeg_force_mpegts.patch
 fi
+# SNI 与证书校验跟随 tls-verify 开关（见 patches/ffmpeg_sni_follow_verify.patch）
+if ! git -C ffmpeg apply --reverse --check ../../patches/ffmpeg_sni_follow_verify.patch 2>/dev/null; then
+	git -C ffmpeg apply ../../patches/ffmpeg_sni_follow_verify.patch
+fi
 
 # freetype2
 if [ ! -d freetype2 ]; then
@@ -201,6 +205,10 @@ if [ ! -d curl ]; then
 	mkdir curl
 	$WGET https://curl.se/download/curl-$v_curl.tar.gz -O - | \
 		tar -xz -C curl --strip-components=1
+fi
+# SNI 与证书校验跟随 tls-verify 开关；curl 非 git 仓库，用源码标记判断是否已打
+if ! grep -q "SNI 跟随 tls-verify" curl/lib/vtls/mbedtls.c 2>/dev/null; then
+	(cd curl && patch -p1 < ../../patches/curl_sni_follow_verify.patch)
 fi
 
 # mpv
